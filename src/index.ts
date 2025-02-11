@@ -4,6 +4,7 @@ import { log } from './config/logger';
 import { cors } from 'hono/cors'
 import auth from './controller/auth/route';
 import org from './controller/org/route';
+import openAPIHono from './api-docs/openAPIRouter';
 
 const app = new Hono();
 

@@ -1,12 +1,12 @@
 import { Context } from "hono"
 import { User, LoginRequest, Provider, providersMap } from "./dto"
 import { google } from "worker-auth-providers"
-import { BadRequestException } from "../../exception/exception"
 import { env } from "hono/adapter"
 import { Env } from "../../types"
-import { createUser, getUser } from '../../repository/users';
 import { generateToken, getUserFromToken } from "../../utils"
 import { ContextWithDB, getDB } from "../../db/connectdb"
+import { BadRequestException } from "../../exception/exception"
+import { createUser, getUser } from "../../repository/users"
 import { createPersonalOrg } from "../../repository/orgs"
 
 export const handleLogin = async (c: Context<{}, any, {}>) => {

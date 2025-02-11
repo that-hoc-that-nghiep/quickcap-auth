@@ -3,7 +3,7 @@ import { logger } from 'hono/logger';
 import { log } from './config/logger';
 import { cors } from 'hono/cors'
 import auth from './controller/auth/route';
-
+import org from './controller/org/route';
 
 const app = new Hono();
 
@@ -15,7 +15,9 @@ app.get('/', (c) => c.text('Welcome to Hono with Cloudflare!'));
 
 app.route("/auth", auth)
 
+app.route("/org", org)
 
+app.route('/api', openAPIHono)
 
 app.notFound((c) => {
     return c.json({

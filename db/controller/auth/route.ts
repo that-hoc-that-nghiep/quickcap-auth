@@ -10,6 +10,7 @@ export const authRegistry = new OpenAPIRegistry()
 auth.post("/login", async (c: Context<{}, any, {}>) => {
     return await handleLogin(c)
 })
+
 authRegistry.registerPath({
     method: "post",
     description: "Login with a provider",

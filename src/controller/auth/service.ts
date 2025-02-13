@@ -39,7 +39,7 @@ export const handleLogin = async (c: Context<{}, any, {}>) => {
             url: redirectUrl,
             code: 302,
         },
-        302
+        200
     )
 }
 

@@ -1,5 +1,5 @@
 import { Context, Hono } from "hono"
-import { handleLogin, handleGoogleCallback, handleVerifyToken } from "./service"
+import { handleLogin, handleGoogleCallback, handleVerifyToken, handleLogout } from "./service"
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi"
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders"
 import { AuthDoc } from "../../model/authModel"
@@ -70,7 +70,7 @@ authRegistry.registerPath({
 });
 
 auth.get("/auth/logout", async (c: Context<{}, any, {}>) => {
-    return c.json({ message: "Logged out" }, 200)
+    return await handleLogout(c)
 })
 
 authRegistry.registerPath({

@@ -8,7 +8,7 @@ import { ContextWithDB, getDB } from "../../db/connectdb"
 import { BadRequestException } from "../../exception/exception"
 import { createUser, getUser } from "../../repository/users"
 import { createPersonalOrg } from "../../repository/orgs"
-import { setCookie } from "hono/cookie"
+import { setCookie, setSignedCookie } from "hono/cookie"
 import { tokenExpries } from "../../config/constant"
 
 export const handleLogin = async (c: Context<{}, any, {}>) => {
@@ -86,25 +86,28 @@ export const handleGoogleCallback = async (c: Context<{}, any, {}>) => {
         }
         const accessToken = await generateToken(userData, JWT_SECRET)
 
-
         setCookie(c as any, "accesstoken", accessToken, {
             path: "/",
             expires: new Date(tokenExpries()),
             domain: "localhost",
             secure: false,
             httpOnly: true,
+            sameSite: "none",
         })
 
         // Set cookie for application
+        const date = new Date()
+        date.setDate(date.getDate() + 1)
         setCookie(c as any, "accesstoken", accessToken, {
             path: "/",
-            expires: new Date(tokenExpries()),
+            expires: date,
             domain: ".quickcap.live",
             secure: true,
             httpOnly: true,
         })
 
-        return c.redirect(`${redirect}`)
+        return c.json({ message: "Login success" }, 200)
+        //return c.redirect(`${redirect}?token=${accessToken}`)
 
     } catch (error) {
         throw new BadRequestException("Invalid request")

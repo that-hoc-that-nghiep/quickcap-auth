@@ -8,6 +8,8 @@ import { ContextWithDB, getDB } from "../../db/connectdb"
 import { BadRequestException } from "../../exception/exception"
 import { createUser, getUser } from "../../repository/users"
 import { createPersonalOrg } from "../../repository/orgs"
+import { setCookie } from "hono/cookie"
+import { tokenExpries } from "../../config/constant"
 
 export const handleLogin = async (c: Context<{}, any, {}>) => {
 
@@ -84,7 +86,25 @@ export const handleGoogleCallback = async (c: Context<{}, any, {}>) => {
         }
         const accessToken = await generateToken(userData, JWT_SECRET)
 
-        return c.redirect(`${redirect}?token=${accessToken}`)
+
+        setCookie(c as any, "accesstoken", accessToken, {
+            path: "/",
+            expires: new Date(tokenExpries()),
+            domain: "localhost",
+            secure: false,
+            httpOnly: true,
+        })
+
+        // Set cookie for application
+        setCookie(c as any, "accesstoken", accessToken, {
+            path: "/",
+            expires: new Date(tokenExpries()),
+            domain: ".quickcap.live",
+            secure: true,
+            httpOnly: true,
+        })
+
+        return c.redirect(`${redirect}`)
 
     } catch (error) {
         throw new BadRequestException("Invalid request")
@@ -93,7 +113,6 @@ export const handleGoogleCallback = async (c: Context<{}, any, {}>) => {
 
 export const handleVerifyToken = async (c: Context<{}, any, {}>) => {
     const { token } = c.req.param()
-
 
     if (!token) {
         throw new BadRequestException("Invalid request")
@@ -106,5 +125,25 @@ export const handleVerifyToken = async (c: Context<{}, any, {}>) => {
     const user = await getUserFromToken(token, { JWT_SECRET, DB: db })
 
     return c.json(user)
+}
+
+export const handleLogout = async (c: Context<{}, any, {}>) => {
+    setCookie(c as any, "accesstoken", "", {
+        path: "/",
+        expires: new Date(0),
+        domain: "localhost",
+        secure: false,
+        httpOnly: true,
+    })
+
+    setCookie(c as any, "accesstoken", "", {
+        path: "/",
+        expires: new Date(0),
+        domain: ".quickcap.live",
+        secure: true,
+        httpOnly: true,
+    })
+
+    return c.json({ message: "Loggout success" }, 200)
 }
 

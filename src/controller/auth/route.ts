@@ -69,6 +69,17 @@ authRegistry.registerPath({
     responses: createApiResponse(AuthDoc, "Success"),
 });
 
+auth.get("/auth/logout", async (c: Context<{}, any, {}>) => {
+    return c.json({ message: "Logged out" }, 200)
+})
+
+authRegistry.registerPath({
+    method: "get",
+    description: "Logout",
+    path: "/auth/logout",
+    tags: ["Auth"],
+    responses: createApiResponse(AuthDoc, "Success"),
+});
 
 
 

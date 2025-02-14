@@ -96,18 +96,15 @@ export const handleGoogleCallback = async (c: Context<{}, any, {}>) => {
         })
 
         // Set cookie for application
-        const date = new Date()
-        date.setDate(date.getDate() + 1)
         setCookie(c as any, "accesstoken", accessToken, {
             path: "/",
-            expires: date,
+            expires: new Date(tokenExpries()),
             domain: ".quickcap.live",
             secure: true,
             httpOnly: true,
         })
 
-        return c.json({ message: "Login success" }, 200)
-        //return c.redirect(`${redirect}?token=${accessToken}`)
+        return c.redirect(`${redirect}`)
 
     } catch (error) {
         throw new BadRequestException("Invalid request")

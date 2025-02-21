@@ -1,5 +1,6 @@
 import { User } from "../controller/auth/dto"
 import { organizations, userOrganization, users } from '../db/schema';
+import { v4 as uuidv4 } from 'uuid';
 import { eq } from 'drizzle-orm';
 import { BadRequestException, NotFoundException } from "../exception/exception";
 
@@ -9,12 +10,12 @@ export const getUser = async (email: string, db: any) => {
         .where(eq(users.email, email))
         .limit(1)
         .run();
-    
+
     if (!user.results[0]) {
         return false;
     }
 
-   const userData = user.results[0];
+    const userData = user.results[0];
 
     const organizationsData = await db
         .select({
@@ -29,7 +30,7 @@ export const getUser = async (email: string, db: any) => {
 
     const organizationsMapped = organizationsData.results.map((orgData: any) => ({
         ...orgData,
-        is_owner: orgData.is_owner,
+        is_owner: Boolean(orgData.is_owner),
         is_permission: orgData.is_permission
     }));
 
@@ -42,15 +43,19 @@ export const getUser = async (email: string, db: any) => {
 
 export const createUser = async (user: User, db: any) => {
     const { email, family_name, given_name, name, picture, verified_email } = user;
+    const id = uuidv4();
 
     const newUser = await db.insert(users)
         .values({
+            id,
             email,
             family_name,
             verified_email,
             given_name,
             name,
             picture,
+            locale: "en",
+            subscription: "FREE"
         })
         .returning();
 

@@ -13,6 +13,7 @@ export interface User {
     family_name: string
     picture: string
     locale: string
+    subscription: string
 }
 
 export enum Provider {

@@ -27,6 +27,7 @@
     "drizzle-orm": "^0.38.3",
     "hono": "^4.6.16",
     "http-status-codes": "^2.3.0",
+    "uuid": "^11.1.0",
     "worker-auth-providers": "^0.0.14-beta.10"
   }
 }

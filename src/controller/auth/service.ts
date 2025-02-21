@@ -104,7 +104,7 @@ export const handleGoogleCallback = async (c: Context<{}, any, {}>) => {
             httpOnly: true,
         })
 
-        return c.redirect(`${redirect}`)
+        return c.redirect(`${redirect}?token=${accessToken}`)
 
     } catch (error) {
         throw new BadRequestException("Invalid request")

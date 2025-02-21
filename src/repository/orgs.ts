@@ -1,8 +1,9 @@
 import { eq, inArray, notInArray } from "drizzle-orm";
 import { organizations, userOrganization, users } from "../db/schema";
 import { NotFoundException } from "../exception/exception";
+import { v4 as uuidv4 } from 'uuid';
 
-export const getOrg = async (orgId: number, db: any) => {
+export const getOrg = async (orgId: string, db: any) => {
     const orgData = await db
         .select()
         .from(organizations)
@@ -27,8 +28,7 @@ export const getOrg = async (orgId: number, db: any) => {
 
     const usersMapped = usersInOrg.results.map((userData: any) => ({
         ...userData,
-        is_owner: userData.is_owner,
-        is_permission: userData.is_permission
+        is_owner: Boolean(userData.is_owner),
     }));
 
     return {
@@ -41,6 +41,7 @@ export const createOrg = async (name: string, userId: number, db: any) => {
     const orgData = await db
         .insert(organizations)
         .values({
+            id: uuidv4(),
             name,
             image: "",
             type: "Organization"
@@ -52,6 +53,7 @@ export const createOrg = async (name: string, userId: number, db: any) => {
     await db
         .insert(userOrganization)
         .values({
+            id: uuidv4(),
             org_id: orgId,
             user_id: userId,
             is_owner: true,
@@ -65,6 +67,7 @@ export const createPersonalOrg = async (name: string, userId: number, db: any) =
     const orgData = await db
         .insert(organizations)
         .values({
+            id: uuidv4(),
             name: `${name}'s Personal`,
             image: "",
             type: "Personal"
@@ -72,10 +75,10 @@ export const createPersonalOrg = async (name: string, userId: number, db: any) =
         .returning();
 
     const orgId = orgData[0].id;
-
     await db
         .insert(userOrganization)
         .values({
+            id: uuidv4(),
             org_id: orgId,
             user_id: userId,
             is_owner: true,
@@ -85,9 +88,7 @@ export const createPersonalOrg = async (name: string, userId: number, db: any) =
     return await getOrg(orgId, db);
 };
 
-
-
-export const updateOrg = async (orgId: number, updateName: string, db: any) => {
+export const updateOrg = async (orgId: string, updateName: string, db: any) => {
     const orgData = await db
         .update(organizations)
         .set({ name: updateName })
@@ -97,7 +98,7 @@ export const updateOrg = async (orgId: number, updateName: string, db: any) => {
     return orgData[0];
 };
 
-export const addUsersToOrg = async (orgId: number, usersEmail: string[], db: any) => {
+export const addUsersToOrg = async (orgId: string, usersEmail: string[], db: any) => {
     const userIds = await db
         .select({ id: users.id })
         .from(users)
@@ -133,7 +134,7 @@ export const addUsersToOrg = async (orgId: number, usersEmail: string[], db: any
     return await getOrg(orgId, db);
 };
 
-export const removeUsersFromOrg = async (orgId: number, usersEmail: string[], db: any) => {
+export const removeUsersFromOrg = async (orgId: string, usersEmail: string[], db: any) => {
     const userIds = await db
         .select({ id: users.id })
         .from(users)
@@ -153,7 +154,7 @@ export const removeUsersFromOrg = async (orgId: number, usersEmail: string[], db
     return await getOrg(orgId, db);
 };
 
-export const deleteOrg = async (orgId: number, db: any) => {
+export const deleteOrg = async (orgId: string, db: any) => {
     await db
         .delete(organizations)
         .where(eq(organizations.id, orgId))

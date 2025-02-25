@@ -99,6 +99,8 @@ export const updateOrg = async (orgId: string, updateName: string, db: any) => {
 };
 
 export const addUsersToOrg = async (orgId: string, usersEmail: string[], db: any) => {
+
+    // Get userIds from usersEmail
     const userIds = await db
         .select({ id: users.id })
         .from(users)
@@ -109,6 +111,7 @@ export const addUsersToOrg = async (orgId: string, usersEmail: string[], db: any
         throw new NotFoundException('No users found');
     }
 
+    // Filter out users that are already in the organization
     const newUsers = await db
         .select()
         .from(users)
@@ -124,6 +127,7 @@ export const addUsersToOrg = async (orgId: string, usersEmail: string[], db: any
         await db
             .insert(userOrganization)
             .values(newUsers.results.map((user: any) => ({
+                id: uuidv4(),
                 org_id: orgId,
                 user_id: user.id,
                 is_owner: false,

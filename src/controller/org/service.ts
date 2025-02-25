@@ -19,7 +19,7 @@ export const handleGetOrg = async (c: Context<{}, "/:orgId", {}>) => {
     }
 
     const db = getDB((c.env as ContextWithDB).DB)
-    const org = await getOrg(orgId as unknown as number, db)
+    const org = await getOrg(orgId, db)
 
     return c.json(org)
 }
@@ -58,7 +58,7 @@ export const handleUpdateOrg = async (c: Context<{}, "/:orgId", {}>) => {
     }
 
     const db = getDB((c.env as ContextWithDB).DB)
-    const org = await updateOrg(orgId as unknown as number, name, db)
+    const org = await updateOrg(orgId, name, db)
 
     return c.json(org)
 }
@@ -85,7 +85,7 @@ export const handleAddUserToOrg = async (c: Context<{}, any, {}>) => {
     }
 
     const db = getDB((c.env as ContextWithDB).DB)
-    const org = await addUsersToOrg(orgId as unknown as number, usersEmail, db)
+    const org = await addUsersToOrg(orgId, usersEmail, db)
 
     return c.json(org)
 }
@@ -119,7 +119,7 @@ export const handleRemoveUserFromOrg = async (c: Context<{}, any, {}>) => {
 
     const db = getDB((c.env as ContextWithDB).DB)
 
-    const org = await removeUsersFromOrg(orgId as unknown as number, usersEmail, db)
+    const org = await removeUsersFromOrg(orgId, usersEmail, db)
 
     return c.json(org)
 }
@@ -139,7 +139,7 @@ export const handleDeteleOrg = async (c: Context<{}, "/:orgId", {}>) => {
     }
 
     const db = getDB((c.env as ContextWithDB).DB)
-    await deleteOrg(orgId as unknown as number, db)
+    await deleteOrg(orgId, db)
 
     return c.json({ message: "Organization deleted" })
 }

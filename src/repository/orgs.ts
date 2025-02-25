@@ -1,4 +1,4 @@
-import { eq, inArray, notInArray } from "drizzle-orm";
+import { and, eq, inArray, notInArray } from "drizzle-orm";
 import { organizations, userOrganization, users } from "../db/schema";
 import { NotFoundException } from "../exception/exception";
 import { v4 as uuidv4 } from 'uuid';
@@ -111,22 +111,22 @@ export const addUsersToOrg = async (orgId: string, usersEmail: string[], db: any
         throw new NotFoundException('No users found');
     }
 
-    // Filter out users that are already in the organization
-    const newUsers = await db
-        .select()
-        .from(users)
-        .where(inArray(users.id, userIds.results.map((user: any) => user.id)))
-        .where(notInArray(users.id,
-            db.select({ user_id: userOrganization.user_id })
-                .from(userOrganization)
-                .where(eq(userOrganization.org_id, orgId))
-        ))
+    // Get users that are already in the organization
+    const existingUserIds = await db
+        .select({ user_id: userOrganization.user_id })
+        .from(userOrganization)
+        .where(eq(userOrganization.org_id, orgId))
         .run();
 
-    if (newUsers.results.length !== 0) {
+    // Filter out users that are already in the organization
+    const newUserIds = userIds.results.filter((user: any) => {
+        return !existingUserIds.results.some((existingUser: any) => existingUser.user_id === user.id);
+    });
+
+    if (newUserIds.length !== 0) {
         await db
             .insert(userOrganization)
-            .values(newUsers.results.map((user: any) => ({
+            .values(newUserIds.map((user: any) => ({
                 id: uuidv4(),
                 org_id: orgId,
                 user_id: user.id,

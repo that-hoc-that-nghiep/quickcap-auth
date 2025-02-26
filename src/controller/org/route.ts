@@ -211,7 +211,7 @@ orgRegistry.registerPath({
                 schema: {
                     type: "object",
                     properties: {
-                        gmail: { type: "string", example: "email1@gmail.com" },
+                        email: { type: "string", example: "email1@gmail.com" },
                         permission: { type: "string", example: "ALL" },
                     },
                     required: ["gmail", "permission"],

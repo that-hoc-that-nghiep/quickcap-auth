@@ -23,7 +23,7 @@ authRegistry.registerPath({
                     type: "object",
                     properties: {
                         provider: { type: "string", example: "google" },
-                        redirectAfterLogin: { type: "string", example: "https://s.jsclub.dev/notion" },
+                        redirectAfterLogin: { type: "string", example: "https://kungfutech.edu.vn/khoa-hoc/javascript" },
                     },
                     required: ["provider", "redirectAfterLogin"],
                 },

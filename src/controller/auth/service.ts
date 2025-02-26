@@ -6,7 +6,7 @@ import { Env } from "../../types"
 import { generateToken, getUserFromToken } from "../../utils"
 import { ContextWithDB, getDB } from "../../db/connectdb"
 import { BadRequestException } from "../../exception/exception"
-import { createUser, getUser } from "../../repository/users"
+import { createUser, getUser, getUserById, updateSubscription } from "../../repository/users"
 import { createPersonalOrg } from "../../repository/orgs"
 import { setCookie, setSignedCookie } from "hono/cookie"
 import { tokenExpries } from "../../config/constant"
@@ -145,5 +145,35 @@ export const handleLogout = async (c: Context<{}, any, {}>) => {
     })
 
     return c.json({ message: "Loggout success" }, 200)
+}
+
+export const handleGetUser = async (c: Context<{}, any, {}>) => {
+    const { id } = c.req.param()
+
+    console.log(id)
+
+    if (!id) {
+        throw new BadRequestException("Invalid request")
+    }
+
+    const db = getDB((c.env as ContextWithDB).DB)
+
+    const user = await getUserById(id, db)
+
+    return c.json(user)
+}
+
+export const handleUpdateSubscription = async (c: Context<{}, any, {}>) => {
+    const { id } = c.req.param()
+
+    if (!id) {
+        throw new BadRequestException("Invalid request")
+    }
+
+    const db = getDB((c.env as ContextWithDB).DB)
+
+    const user = await updateSubscription(id, db)
+
+    return c.json(user)
 }
 

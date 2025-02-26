@@ -65,3 +65,32 @@ export const createUser = async (user: User, db: any) => {
 
     return newUser[0];
 };
+
+export const getUserById = async (id: string, db: any) => {
+    const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1)
+        .run();
+
+    if (!user.results[0]) {
+        throw new NotFoundException("User not found");
+    }
+
+    return user.results[0];
+};
+
+export const updateSubscription = async (id: string, db: any) => {
+    const user = await db
+        .update(users)
+        .set({ subscription: "PREMIUM" })
+        .where(eq(users.id, id))
+        .returning()
+        .run();
+
+    if (!user) {
+        throw new NotFoundException("User not found");
+    }
+    return user.results[0];
+};

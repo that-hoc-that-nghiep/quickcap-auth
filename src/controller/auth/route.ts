@@ -1,5 +1,5 @@
 import { Context, Hono } from "hono"
-import { handleLogin, handleGoogleCallback, handleVerifyToken, handleLogout } from "./service"
+import { handleLogin, handleGoogleCallback, handleVerifyToken, handleLogout, handleGetUser, handleUpdateSubscription } from "./service"
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi"
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders"
 import { AuthDoc } from "../../model/authModel"
@@ -69,7 +69,7 @@ authRegistry.registerPath({
     responses: createApiResponse(AuthDoc, "Success"),
 });
 
-auth.get("/auth/logout", async (c: Context<{}, any, {}>) => {
+auth.get("/logout", async (c: Context<{}, any, {}>) => {
     return await handleLogout(c)
 })
 
@@ -78,6 +78,56 @@ authRegistry.registerPath({
     description: "Logout",
     path: "/auth/logout",
     tags: ["Auth"],
+    responses: createApiResponse(AuthDoc, "Success"),
+});
+
+//Get user by id
+auth.get("/user/:id", async (c: Context<{}, "/:id", {}>) => {
+    return await handleGetUser(c)
+})
+
+authRegistry.registerPath({
+    method: "get",
+    description: "Get user by id",
+    path: "/auth/user/{id}",
+    tags: ["Auth"],
+    parameters: [
+        {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+                type: "string",
+                example: "1"
+            },
+            description: "User ID",
+        }
+    ],
+    responses: createApiResponse(AuthDoc, "Success"),
+});
+
+//Update subscription
+auth.put("/user/:id/subscription", async (c: Context<{}, "/:id/subscription", {}>) => {
+    return await handleUpdateSubscription(c)
+})
+
+authRegistry.registerPath({
+    method: "put",
+    description: "Update subscription",
+    path: "/auth/user/{id}/subscription",
+    tags: ["Auth"],
+    parameters: [
+        {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+                type: "string",
+                example: "1"
+            },
+            description: "User ID",
+        }
+    ],
     responses: createApiResponse(AuthDoc, "Success"),
 });
 

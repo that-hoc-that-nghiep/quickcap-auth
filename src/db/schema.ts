@@ -10,7 +10,7 @@ export const users = sqliteTable('users', {
     family_name: text('family_name').notNull(),
     picture: text('picture').notNull(),
     locale: text('locale'),
-    subscription: text('subscription'), // FREE, PRO
+    subscription: text('subscription'), // FREE, PREMIUM
     timestamp: text('timestamp')
         .default(sql`CURRENT_TIMESTAMP`)
         .notNull(),

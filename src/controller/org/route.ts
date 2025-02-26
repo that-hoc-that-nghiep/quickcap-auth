@@ -8,6 +8,7 @@ import {
     handleRemoveUserFromOrg,
     // handleTransferOwnership,
     handleUpdateOrg,
+    handleUpdatePermission,
 } from "./service"
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi"
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders"
@@ -183,10 +184,44 @@ orgRegistry.registerPath({
     responses: createApiResponse(OrgDoc, "Success"),
 });
 
-// org.put("/:orgId/transfer", async (c: Context<{}, any, {}>) => {
-//     return await handleTransferOwnership(c)
-// })
+org.put("/:orgId/permission", async (c: Context<{}, any, {}>) => {
+    return await handleUpdatePermission(c)
+})
 
+orgRegistry.registerPath({
+    method: "put",
+    description: "Update a user's permission in an organization",
+    path: "/org/{orgId}/permission",
+    tags: ["Org"],
+    parameters: [
+        {
+            name: "orgId",
+            in: "path",
+            required: true,
+            schema: {
+                type: "string",
+                example: "1",
+            },
+            description: "Organization ID",
+        },
+    ],
+    requestBody: {
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        gmail: { type: "string", example: "email1@gmail.com" },
+                        permission: { type: "string", example: "ALL" },
+                    },
+                    required: ["gmail", "permission"],
+                },
+            },
+        },
+    },
+    security: [{ bearerAuth: [] }],
+    responses: createApiResponse(OrgDoc, "Success"),
+});
 // org.delete("/:orgId/leave", async (c: Context<{}, any, {}>) => {
 //     return await handleLeaveOrg(c)
 // })

@@ -1,14 +1,14 @@
 import { Context } from "hono"
 import { getUserFromHeader } from "../../utils"
 import { ContextWithDB, getDB } from "../../db/connectdb"
-import { AddUserToOrgRequest, CreateOrgRequest, RemoveUserFromOrgRequest, UpdateOrgRequest } from "./dto"
+import { AddUserToOrgRequest, CreateOrgRequest, RemoveUserFromOrgRequest, UpdateOrgRequest, UpdatePermissionInOrgRequest } from "./dto"
 import { BadRequestException, ForbiddenException } from "../../exception/exception"
-import { addUsersToOrg, createOrg, deleteOrg, getOrg, removeUsersFromOrg, updateOrg } from "../../repository/orgs"
+import { addUsersToOrg, createOrg, deleteOrg, getOrg, removeUsersFromOrg, updateOrg, updatePermisstion } from "../../repository/orgs"
 
 export const handleGetOrg = async (c: Context<{}, "/:orgId", {}>) => {
     const user = await getUserFromHeader(c)
     const { orgId } = c.req.param()
-    
+
     const isBelongsToOrg = user.organizations.some((org: any) => org.id == orgId)
 
     if (!isBelongsToOrg) {
@@ -143,4 +143,27 @@ export const handleDeteleOrg = async (c: Context<{}, "/:orgId", {}>) => {
     return c.json({ message: "Organization deleted" })
 }
 
+export const handleUpdatePermission = async (c: Context<{}, any, {}>) => {
+    const user = await getUserFromHeader(c)
+
+    const { orgId } = c.req.param()
+
+    const { email, permission } = await c.req.json<UpdatePermissionInOrgRequest>()
+
+    const isOwner = user.organizations.some(
+        (org: any) => org.id == orgId && org.is_owner
+    )
+
+    if (!isOwner) {
+        throw new ForbiddenException(
+            "You are not an owner of this organization"
+        )
+    }
+
+    const db = getDB((c.env as ContextWithDB).DB)
+
+    const org = await updatePermisstion(orgId, email, permission, db)
+
+    return c.json(org)
+}
 

@@ -23,3 +23,8 @@ export interface RemoveUserFromOrgRequest {
 export interface TransferOwnershipRequest {
     newOwnerEmail: string
 }
+
+export interface UpdatePermissionInOrgRequest {
+    email: string
+    permission: string
+}

@@ -30,7 +30,7 @@ export const userOrganization = sqliteTable('user_organization', {
     id: text('id').primaryKey(),  
     user_id: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),  
     org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),  // ALL, READ, CREATE
-    is_permission: text('is_permission').notNull(), // ALL, READ, CREATE
+    is_permission: text('is_permission').notNull(), // ALL, READ, UPLOAD
     is_owner: integer('is_owner', { mode: 'boolean' }).default(sql`0`).notNull(),
     timestamp: text('timestamp')
         .default(sql`CURRENT_TIMESTAMP`)

@@ -94,3 +94,18 @@ export const updateSubscription = async (id: string, subscription: string, db: a
     }
     return user.results[0];
 };
+
+export const getUserByEmail = async (email: string, db: any) => {
+    const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1)
+        .run()
+
+    if (!user.results[0]) {
+        throw new NotFoundException("User not found");
+    }
+
+    return user.results[0]
+}

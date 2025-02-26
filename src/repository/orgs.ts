@@ -2,6 +2,7 @@ import { and, eq, inArray, notInArray } from "drizzle-orm";
 import { organizations, userOrganization, users } from "../db/schema";
 import { NotFoundException } from "../exception/exception";
 import { v4 as uuidv4 } from 'uuid';
+import { getUserByEmail } from "./users";
 
 export const getOrg = async (orgId: string, db: any) => {
     const orgData = await db
@@ -165,4 +166,49 @@ export const deleteOrg = async (orgId: string, db: any) => {
         .run();
 
     return true;
+}
+
+export const updatePermisstion = async (orgId: string, email: string, permission: string, db: any) => {
+
+    let user = null
+    const userId = await getUserByEmail(email, db)
+
+    //Check userId is have in org or not
+    const userOrg = await db
+        .select()
+        .from(userOrganization)
+        .where(and(eq(userOrganization.org_id, orgId), eq(userOrganization.user_id, userId.id)))
+        .limit(1)
+        .run();
+
+    if (!userOrg.results || userOrg.results.length === 0) {
+        throw new NotFoundException("User does not belong to the organization");
+    }
+
+
+    if (permission === "READ" || permission === "UPLOAD") {
+        user = await db
+            .update(userOrganization)
+            .set({
+                is_permission: permission,
+                is_owner: false
+            })
+            .where(and(eq(userOrganization.org_id, orgId), eq(userOrganization.user_id, userId.id)))
+            .returning()
+            .run();
+    }
+
+    if (permission === "ALL") {
+        user = await db
+            .update(userOrganization)
+            .set({
+                is_permission: permission,
+                is_owner: true
+            })
+            .where(and(eq(userOrganization.org_id, orgId), eq(userOrganization.user_id, userId.id)))
+            .returning()
+            .run();
+    }
+
+    return user.results[0];
 }

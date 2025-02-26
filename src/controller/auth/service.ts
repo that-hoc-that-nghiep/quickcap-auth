@@ -3,7 +3,7 @@ import { User, LoginRequest, Provider, providersMap } from "./dto"
 import { google } from "worker-auth-providers"
 import { env } from "hono/adapter"
 import { Env } from "../../types"
-import { generateToken, getUserFromToken } from "../../utils"
+import { generateToken, getUserFromHeader, getUserFromToken } from "../../utils"
 import { ContextWithDB, getDB } from "../../db/connectdb"
 import { BadRequestException } from "../../exception/exception"
 import { createUser, getUser, getUserById, updateSubscription } from "../../repository/users"
@@ -164,16 +164,18 @@ export const handleGetUser = async (c: Context<{}, any, {}>) => {
 }
 
 export const handleUpdateSubscription = async (c: Context<{}, any, {}>) => {
-    const { id } = c.req.param()
+    const user = await getUserFromHeader(c)
 
-    if (!id) {
-        throw new BadRequestException("Invalid request")
+    const { subscription } = await c.req.json<{ subscription: string }>()
+
+    if (!subscription) {
+        throw new BadRequestException("Invalid subscription")
     }
 
     const db = getDB((c.env as ContextWithDB).DB)
 
-    const user = await updateSubscription(id, db)
+    const updatedUser = await updateSubscription(user.id, subscription, db)
 
-    return c.json(user)
+    return c.json(updatedUser)
 }
 

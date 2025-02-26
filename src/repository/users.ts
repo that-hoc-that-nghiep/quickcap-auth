@@ -81,10 +81,10 @@ export const getUserById = async (id: string, db: any) => {
     return user.results[0];
 };
 
-export const updateSubscription = async (id: string, db: any) => {
+export const updateSubscription = async (id: string, subscription: string, db: any) => {
     const user = await db
         .update(users)
-        .set({ subscription: "PREMIUM" })
+        .set({ subscription: subscription })
         .where(eq(users.id, id))
         .returning()
         .run();

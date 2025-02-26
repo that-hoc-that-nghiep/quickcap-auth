@@ -1,7 +1,6 @@
 import { Context } from "hono"
 import { getUserFromHeader } from "../../utils"
 import { ContextWithDB, getDB } from "../../db/connectdb"
-import { organizations } from "../../db/schema"
 import { AddUserToOrgRequest, CreateOrgRequest, RemoveUserFromOrgRequest, UpdateOrgRequest } from "./dto"
 import { BadRequestException, ForbiddenException } from "../../exception/exception"
 import { addUsersToOrg, createOrg, deleteOrg, getOrg, removeUsersFromOrg, updateOrg } from "../../repository/orgs"
@@ -9,7 +8,7 @@ import { addUsersToOrg, createOrg, deleteOrg, getOrg, removeUsersFromOrg, update
 export const handleGetOrg = async (c: Context<{}, "/:orgId", {}>) => {
     const user = await getUserFromHeader(c)
     const { orgId } = c.req.param()
-    console.log(user.organizations)
+    
     const isBelongsToOrg = user.organizations.some((org: any) => org.id == orgId)
 
     if (!isBelongsToOrg) {

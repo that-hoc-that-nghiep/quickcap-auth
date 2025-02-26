@@ -107,27 +107,29 @@ authRegistry.registerPath({
 });
 
 //Update subscription
-auth.put("/user/:id/subscription", async (c: Context<{}, "/:id/subscription", {}>) => {
+auth.put("/subscription", async (c: Context<{}, "/subscription", {}>) => {
     return await handleUpdateSubscription(c)
 })
 
 authRegistry.registerPath({
     method: "put",
     description: "Update subscription",
-    path: "/auth/user/{id}/subscription",
+    path: "/auth/subscription",
     tags: ["Auth"],
-    parameters: [
-        {
-            name: "id",
-            in: "path",
-            required: true,
-            schema: {
-                type: "string",
-                example: "1"
+    requestBody: {
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        subscription: { type: "string", example: "PREMIUM" },
+                    },
+                    required: ["subscription"],
+                },
             },
-            description: "User ID",
-        }
-    ],
+        },  
+    },
+    security: [{ bearerAuth: [] }],
     responses: createApiResponse(AuthDoc, "Success"),
 });
 

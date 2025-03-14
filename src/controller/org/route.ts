@@ -4,6 +4,7 @@ import {
     handleCreateOrg,
     handleDeteleOrg,
     handleGetOrg,
+    handleLeaveOrg,
     // handleLeaveOrg,
     handleRemoveUserFromOrg,
     // handleTransferOwnership,
@@ -173,9 +174,9 @@ orgRegistry.registerPath({
                 schema: {
                     type: "object",
                     properties: {
-                        usersEmail: { type: "array", example: ["email1@gmail.com", "email2@gmail.com"] },
+                        email: { type: "string", example: "email1@gmail.com" },
                     },
-                    required: ["usersEmail"],
+                    required: ["email"],
                 },
             },
         },
@@ -222,9 +223,45 @@ orgRegistry.registerPath({
     security: [{ bearerAuth: [] }],
     responses: createApiResponse(OrgDoc, "Success"),
 });
-// org.delete("/:orgId/leave", async (c: Context<{}, any, {}>) => {
-//     return await handleLeaveOrg(c)
-// })
+
+org.delete("/:orgId/leave", async (c: Context<{}, any, {}>) => {
+    return await handleLeaveOrg(c)
+})
+
+
+orgRegistry.registerPath({
+    method: "delete",
+    description: "Leave an organization",
+    path: "/org/{orgId}/leave",
+    tags: ["Org"],
+    parameters: [
+        {
+            name: "orgId",
+            in: "path",
+            required: true,
+            schema: {
+                type: "string",
+                example: "1",
+            },
+            description: "Organization ID",
+        },
+    ],
+    requestBody: {
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        email: { type: "string", example: "email1@gmail.com" },
+                    },
+                    required: ["email"],
+                },
+            },
+        }
+    },
+    security: [{ bearerAuth: [] }],
+    responses: createApiResponse(OrgDoc, "Success"),
+});
 
 org.delete("/:orgId", async (c: Context<{}, any, {}>) => {
     return await handleDeteleOrg(c)

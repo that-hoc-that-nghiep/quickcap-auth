@@ -90,38 +90,32 @@ export const handleAddUserToOrg = async (c: Context<{}, any, {}>) => {
 }
 
 export const handleRemoveUserFromOrg = async (c: Context<{}, any, {}>) => {
-    const user = await getUserFromHeader(c)
-
-    const { orgId } = c.req.param()
-
-    const { usersEmail } = await c.req.json<RemoveUserFromOrgRequest>()
-
-    if (!Array.isArray(usersEmail) || usersEmail.length === 0) {
-        throw new BadRequestException("Invalid email")
-    }
+    const user = await getUserFromHeader(c);
+    const { orgId } = c.req.param();
+    const { email } = await c.req.json<RemoveUserFromOrgRequest>();
 
     const isOwner = user.organizations.some(
         (org: any) => org.id == orgId && org.is_owner
-    )
+    );
 
     if (!isOwner) {
         throw new ForbiddenException(
             "You are not an owner of this organization"
-        )
+        );
     }
 
-    if (usersEmail.includes(user.email)) {
+    if (user.email === email) {
         throw new BadRequestException(
             "You can not remove yourself, transfer ownership first"
-        )
+        );
     }
 
-    const db = getDB((c.env as ContextWithDB).DB)
+    const db = getDB((c.env as ContextWithDB).DB);
 
-    const org = await removeUsersFromOrg(orgId, usersEmail, db)
+    const org = await removeUsersFromOrg(orgId, [email], db); 
 
-    return c.json(org)
-}
+    return c.json(org);
+};
 
 export const handleDeteleOrg = async (c: Context<{}, "/:orgId", {}>) => {
     const user = await getUserFromHeader(c)
@@ -165,5 +159,35 @@ export const handleUpdatePermission = async (c: Context<{}, any, {}>) => {
     const org = await updatePermisstion(orgId, email, permission, db)
 
     return c.json(org)
+}
+
+export const handleLeaveOrg = async (c: Context<{}, any, {}>) => {
+    const user = await getUserFromHeader(c)
+
+    const { orgId } = c.req.param()
+
+    const isOwner = user.organizations.some(
+        (org: any) => org.id === orgId && org.is_owner
+    )
+
+    if (isOwner) {
+        throw new BadRequestException(
+            "You can not leave organization, transfer ownership first"
+        )
+    }
+
+    const isBelongsToOrg = user.organizations.some((org: any) => org.id === orgId)
+
+    if (!isBelongsToOrg) {
+        throw new ForbiddenException(
+            "You are not a member of this organization"
+        )
+    }
+
+    const db = getDB((c.env as ContextWithDB).DB)
+
+    await removeUsersFromOrg(orgId, [user.email], db)
+
+    return c.json({ message: "You have left the organization" })
 }
 

@@ -17,7 +17,7 @@ export interface AddUserToOrgRequest {
 }
 
 export interface RemoveUserFromOrgRequest {
-    usersEmail: string[]
+    email: string
 }
 
 export interface TransferOwnershipRequest {

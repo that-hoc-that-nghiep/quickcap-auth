@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+import { is, sql } from 'drizzle-orm';
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable('users', {
@@ -21,6 +21,7 @@ export const organizations = sqliteTable('organizations', {
     name: text('name').notNull(),
     image: text('image').notNull(),
     type: text('type').notNull(), // Organization, Personal
+    isDeleted: integer('isDeleted', { mode: 'boolean' }).default(sql`0`).notNull(),
     timestamp: text('timestamp')
         .default(sql`CURRENT_TIMESTAMP`)
         .notNull(),

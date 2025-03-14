@@ -160,6 +160,21 @@ export const removeUsersFromOrg = async (orgId: string, usersEmail: string[], db
 };
 
 export const deleteOrg = async (orgId: string, db: any) => {
+    const orgData = await db
+        .select()
+        .from(organizations)
+        .where(eq(organizations.id, orgId))
+        .limit(1)
+        .run();
+
+    if(!orgData || orgData.results.length === 0) {
+        throw new NotFoundException("Organization not found");
+    }
+
+    if(orgData.results[0].type === "Personal") {
+        throw new NotFoundException("Cannot delete personal organization");
+    }
+    
     await db
         .update(organizations)
         .set({ isDeleted: 1 })

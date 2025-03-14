@@ -269,7 +269,7 @@ org.delete("/:orgId", async (c: Context<{}, any, {}>) => {
 
 orgRegistry.registerPath({
     method: "delete",
-    description: "Delete an organization",
+    description: "Soft delete an organization",
     path: "/org/{orgId}",
     tags: ["Org"],
     parameters: [

@@ -161,12 +161,13 @@ export const removeUsersFromOrg = async (orgId: string, usersEmail: string[], db
 
 export const deleteOrg = async (orgId: string, db: any) => {
     await db
-        .delete(organizations)
+        .update(organizations)
+        .set({ isDeleted: 1 })
         .where(eq(organizations.id, orgId))
         .run();
 
     return true;
-}
+};
 
 export const updatePermisstion = async (orgId: string, email: string, permission: string, db: any) => {
 

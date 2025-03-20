@@ -3,6 +3,9 @@ import { organizations, userOrganization, users } from "../db/schema";
 import { NotFoundException } from "../exception/exception";
 import { v4 as uuidv4 } from 'uuid';
 import { getUserByEmail } from "./users";
+import axios from "axios";
+import { env } from "hono/adapter";
+import { Env } from "../types";
 
 export const getOrg = async (orgId: string, db: any) => {
     const orgData = await db
@@ -38,7 +41,7 @@ export const getOrg = async (orgId: string, db: any) => {
     };
 };
 
-export const createOrg = async (name: string, userId: number, db: any) => {
+export const createOrg = async (name: string, userId: number, db: any, quickcapBeUrl: string, token: string) => {
     const orgData = await db
         .insert(organizations)
         .values({
@@ -50,6 +53,17 @@ export const createOrg = async (name: string, userId: number, db: any) => {
         .returning();
 
     const orgId = orgData[0].id;
+
+    const res = await axios.post(`${quickcapBeUrl}/category/${orgId}`,
+        { name: "Default", },
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        }
+    );
+    console.log(res.data);
 
     await db
         .insert(userOrganization)
@@ -167,14 +181,14 @@ export const deleteOrg = async (orgId: string, db: any) => {
         .limit(1)
         .run();
 
-    if(!orgData || orgData.results.length === 0) {
+    if (!orgData || orgData.results.length === 0) {
         throw new NotFoundException("Organization not found");
     }
 
-    if(orgData.results[0].type === "Personal") {
+    if (orgData.results[0].type === "Personal") {
         throw new NotFoundException("Cannot delete personal organization");
     }
-    
+
     await db
         .update(organizations)
         .set({ isDeleted: 1 })

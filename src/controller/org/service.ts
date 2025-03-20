@@ -1,9 +1,11 @@
 import { Context } from "hono"
-import { getUserFromHeader } from "../../utils"
+import { getTokenFromHeader, getUserFromHeader } from "../../utils"
 import { ContextWithDB, getDB } from "../../db/connectdb"
 import { AddUserToOrgRequest, CreateOrgRequest, RemoveUserFromOrgRequest, UpdateOrgRequest, UpdatePermissionInOrgRequest } from "./dto"
 import { BadRequestException, ForbiddenException } from "../../exception/exception"
 import { addUsersToOrg, createOrg, deleteOrg, getOrg, removeUsersFromOrg, updateOrg, updatePermisstion } from "../../repository/orgs"
+import { env } from "hono/adapter"
+import { Env } from "../../types"
 
 export const handleGetOrg = async (c: Context<{}, "/:orgId", {}>) => {
     const user = await getUserFromHeader(c)
@@ -27,12 +29,21 @@ export const handleCreateOrg = async (c: Context<{}, any, {}>) => {
     const user = await getUserFromHeader(c)
     const { name } = await c.req.json<CreateOrgRequest>()
 
+    const token = getTokenFromHeader(c)
+
+    if (!token) {
+        throw new BadRequestException("Invalid token")
+    }
+
     if (!name || name.trim() === "") {
         throw new BadRequestException("Invalid name")
     }
 
+    const { QUICKCAP_BE_URL } = env<typeof Env>(c)
+
     const db = getDB((c.env as ContextWithDB).DB)
-    const newOrg = await createOrg(name, user.id, db)
+
+    const newOrg = await createOrg(name, user.id, db, QUICKCAP_BE_URL, token)
 
     return c.json(newOrg)
 }
@@ -112,7 +123,7 @@ export const handleRemoveUserFromOrg = async (c: Context<{}, any, {}>) => {
 
     const db = getDB((c.env as ContextWithDB).DB);
 
-    const org = await removeUsersFromOrg(orgId, [email], db); 
+    const org = await removeUsersFromOrg(orgId, [email], db);
 
     return c.json(org);
 };

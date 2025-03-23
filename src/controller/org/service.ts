@@ -6,6 +6,8 @@ import { BadRequestException, ForbiddenException } from "../../exception/excepti
 import { addUsersToOrg, createOrg, deleteOrg, getOrg, removeUsersFromOrg, updateOrg, updatePermisstion } from "../../repository/orgs"
 import { env } from "hono/adapter"
 import { Env } from "../../types"
+import { supabase } from "../../utils/supabase"
+import { createOrgSupabase } from "../../repository/orgsSupabase"
 
 export const handleGetOrg = async (c: Context<{}, "/:orgId", {}>) => {
     const user = await getUserFromHeader(c)
@@ -39,11 +41,15 @@ export const handleCreateOrg = async (c: Context<{}, any, {}>) => {
         throw new BadRequestException("Invalid name")
     }
 
-    const { QUICKCAP_BE_URL } = env<typeof Env>(c)
+    const { QUICKCAP_BE_URL, SUPABASE_URL, SUPABASE_KEY } = env<typeof Env>(c)
+
+    const sp = supabase(SUPABASE_URL, SUPABASE_KEY)
 
     const db = getDB((c.env as ContextWithDB).DB)
 
     const newOrg = await createOrg(name, user.id, db, QUICKCAP_BE_URL, token)
+
+    await createOrgSupabase(name, user.id, sp)
 
     return c.json(newOrg)
 }

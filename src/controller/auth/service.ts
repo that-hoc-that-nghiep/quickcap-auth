@@ -10,6 +10,9 @@ import { createUser, getUser, getUserById, updateSubscription } from "../../repo
 import { createPersonalOrg } from "../../repository/orgs"
 import { setCookie, setSignedCookie } from "hono/cookie"
 import { tokenExpries } from "../../config/constant"
+import { supabase } from "../../utils/supabase"
+import { createPersonalOrgSupabase } from "../../repository/orgsSupabase"
+import { createUserSupabase } from "../../repository/usersSupabase"
 
 export const handleLogin = async (c: Context<{}, any, {}>) => {
 
@@ -59,6 +62,8 @@ export const handleGoogleCallback = async (c: Context<{}, any, {}>) => {
             GOOGLE_CLIENT_SECRET,
             SERVICE_URL,
             JWT_SECRET,
+            SUPABASE_URL,
+            SUPABASE_KEY,
         } = env<typeof Env>(c)
 
         const { user } = await google.users({
@@ -69,6 +74,9 @@ export const handleGoogleCallback = async (c: Context<{}, any, {}>) => {
             },
             request,
         })
+
+        const sp = supabase(SUPABASE_URL, SUPABASE_KEY)
+
         const db = getDB((c.env as ContextWithDB).DB)
 
         let userData: User | null = null
@@ -76,9 +84,16 @@ export const handleGoogleCallback = async (c: Context<{}, any, {}>) => {
         const data = await getUser(user.email, db)
 
         if (!data) {
-            const newUser = await createUser(user, db)
 
+            const newUser = await createUser(user, db)
+            
             await createPersonalOrg(user.name, newUser.id, db)
+
+            // Create user to supabase
+            await createUserSupabase(user as User, newUser.id, sp)
+
+            //  Create personal org to supabase
+            await createPersonalOrgSupabase(user.name, newUser.id, sp)
 
             userData = newUser as User
         } else {

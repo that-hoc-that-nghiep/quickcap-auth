@@ -41,7 +41,7 @@ export const getOrg = async (orgId: string, db: any) => {
     };
 };
 
-export const createOrg = async (name: string, userId: number, db: any, quickcapBeUrl: string, token: string) => {
+export const createOrg = async (name: string, userId: string, db: any, quickcapBeUrl: string, token: string) => {
     const orgData = await db
         .insert(organizations)
         .values({
@@ -78,7 +78,7 @@ export const createOrg = async (name: string, userId: number, db: any, quickcapB
     return await getOrg(orgId, db);
 };
 
-export const createPersonalOrg = async (name: string, userId: number, db: any) => {
+export const createPersonalOrg = async (name: string, userId: string, db: any) => {
     const orgData = await db
         .insert(organizations)
         .values({

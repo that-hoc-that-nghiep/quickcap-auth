@@ -153,22 +153,31 @@ export const addUsersToOrg = async (orgId: string, usersEmail: string[], db: any
     return await getOrg(orgId, db);
 };
 
-export const removeUsersFromOrg = async (orgId: string, usersEmail: string[], db: any) => {
-    const userIds = await db
-        .select({ id: users.id })
-        .from(users)
-        .where(inArray(users.email, usersEmail))
+export const removeUsersFromOrg = async (orgId: string, email: string, db: any) => {
+    const user = await getUserByEmail(email, db);
+
+    //Check userId is have in org or not
+    const userOrg = await db
+        .select()
+        .from(userOrganization)
+        .where(eq(userOrganization.org_id, orgId))
+        .where(eq(userOrganization.user_id, user.id))
+        .limit(1)
         .run();
 
-    if (!userIds || userIds.results.length === 0) {
-        throw new NotFoundException('No users found');
+    if (!userOrg || userOrg.results.length === 0) {
+        throw new NotFoundException("User not found in organization");
     }
 
     await db
         .delete(userOrganization)
-        .where(eq(userOrganization.org_id, orgId))
-        .where(inArray(userOrganization.user_id, userIds.results.map((user: any) => user.id)))
-        .returning();
+        .where(
+            and(
+                eq(userOrganization.org_id, orgId),
+                eq(userOrganization.user_id, user.id)
+            )
+        )
+        .run();
 
     return await getOrg(orgId, db);
 };

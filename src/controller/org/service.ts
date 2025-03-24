@@ -117,7 +117,7 @@ export const handleRemoveUserFromOrg = async (c: Context<{}, any, {}>) => {
 
 	const db = getDB((c.env as ContextWithDB).DB);
 
-	const org = await removeUsersFromOrg(orgId, [email], db);
+	const org = await removeUsersFromOrg(orgId, email, db);
 
 	return c.json(org);
 };
@@ -177,7 +177,7 @@ export const handleLeaveOrg = async (c: Context<{}, any, {}>) => {
 
 	const db = getDB((c.env as ContextWithDB).DB);
 
-	await removeUsersFromOrg(orgId, [user.email], db);
+	await removeUsersFromOrg(orgId, user.email, db);
 
 	return c.json({ message: 'You have left the organization' });
 };

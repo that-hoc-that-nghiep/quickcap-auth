@@ -5,7 +5,6 @@ import {
     handleDeteleOrg,
     handleGetOrg,
     handleLeaveOrg,
-    // handleLeaveOrg,
     handleRemoveUserFromOrg,
     // handleTransferOwnership,
     handleUpdateOrg,
